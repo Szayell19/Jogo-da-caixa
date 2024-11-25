@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quer namorar comigo?</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f0f8;
+            text-align: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+        h1 {
+            color: #7d5ba6;
+        }
+        .game-container {
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 10px;
+            justify-content: center;
+        }
+        .box {
+            width: 100px;
+            height: 100px;
+            background-color: #fff;
+            border: 2px solid #7d5ba6;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #7d5ba6;
+            transition: background-color 0.3s;
+        }
+        .box:hover {
+            background-color: #e6d8ff;
+        }
+        #debounce {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #aa3d72;
+        }
+        #message {
+            display: none;
+            margin-top: 20px;
+            font-size: 24px;
+            color: #7d5ba6;
+            animation: fadeIn 2s;
+        }
+        .rose {
+            position: absolute;
+            font-size: 50px;
+            animation: fall linear infinite;
+        }
+        @keyframes fall {
+            from {
+                transform: translateY(-100px);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Encontre a caixa escondida 🎁</h1>
+    <p>Você possui apenas 4 chances!</p>
+    <div class="game-container">
+        <div class="box" onclick="checkBox(this, false)">?</div>
+        <div class="box" onclick="checkBox(this, false)">?</div>
+        <div class="box" onclick="checkBox(this, true)">?</div>
+        <div class="box" onclick="checkBox(this, false)">?</div>
+        <div class="box" onclick="checkBox(this, false)">?</div>
+        <div class="box" onclick="checkBox(this, false)">?</div>
+    </div>
+    <div id="debounce"></div>
+    <div id="message">
+        <p>Você foi premiada! Agora seu desejo irá se tornar realidade.</p>
+        <p><strong>Gabiela 💖 Quer namorar comigo?</strong></p>
+    </div>
+
+    <!-- Som de falha -->
+    <audio id="fail-sound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+    
+    <!-- Som romântico -->
+    <audio id="success-sound" src="https://www.soundjay.com/button/beep-08b.wav" preload="auto"></audio>
+
+    <script>
+        const debouncingPhrases = [
+            "Hmmm... Não foi dessa vez!",
+            "Você está quente, mas ainda não achou.",
+            "Sério? Tente melhor!",
+            "Errou feio, errou rude.",
+            "Ainda não, mas continue tentando!"
+        ];
+
+        let attempts = 0;
+        let errorsBeforeWin = 3;
+        let chances = 4;
+
+        function createRose() {
+            const rose = document.createElement("div");
+            rose.className = "rose";
+            rose.innerHTML = "🌹";  // Usando o emoji de rosa
+            rose.style.left = Math.random() * 100 + "vw";
+            rose.style.animationDuration = Math.random() * 3 + 2 + "s";
+            document.body.appendChild(rose);
+
+            setTimeout(() => rose.remove(), 5000);
+        }
+
+        function startCelebration() {
+            for (let i = 0; i < 50; i++) {
+                setTimeout(createRose, i * 100); // Rosas caindo
+            }
+
+            // Tocar som romântico
+            document.getElementById("success-sound").play();
+        }
+
+        function playFailSound() {
+            // Tocar som de falha
+            document.getElementById("fail-sound").play();
+        }
+
+        function checkBox(box, isHiddenBox) {
+            if (attempts >= chances) {
+                document.getElementById("debounce").innerText = "Você usou todas as suas chances! 😔";
+                return;
+            }
+
+            attempts++;
+
+            if (isHiddenBox) {
+                if (errorsBeforeWin > 0) {
+                    document.getElementById("debounce").innerText =
+                        "Você precisa tentar mais algumas vezes antes de encontrar a caixa certa.";
+                    box.innerHTML = "❌";
+                } else {
+                    box.innerHTML = "🎁";
+                    document.getElementById("debounce").style.display = "none";
+                    document.getElementById("message").style.display = "block";
+                    startCelebration();
+                }
+            } else {
+                box.innerHTML = "❌";
+                const randomPhrase = debouncingPhrases[Math.floor(Math.random() * debouncingPhrases.length)];
+                document.getElementById("debounce").innerText = randomPhrase;
+                playFailSound(); // Tocar som de falha
+                errorsBeforeWin--;
+            }
+        }
+    </script>
+</body>
+</html>
